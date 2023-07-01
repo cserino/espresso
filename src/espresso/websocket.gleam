@@ -11,15 +11,20 @@
 /// 
 /// The inner string of the types is the message that the client socket will receive
 pub type Frame {
+  Subscribe(Pid)
   Reply(String)
+  Text(String)
   Ping(String)
   Pong(String)
+  Nothing
   Close(String)
 }
+
+pub external type Pid
 
 /// Websocket is a function that takes a string and returns a Frame
 /// 
 /// The string is the message that the client socket will receive
 /// and the Frame is the response that the server will send.
 pub type Websocket =
-  fn(String) -> Frame
+  fn(Frame) -> Frame

@@ -11,20 +11,24 @@ init(Req, Handler) ->
     {cowboy_websocket, Req, Handler}.
 
 websocket_init(Handler) ->
+    Handler({subscribe, self()}),
     {ok, Handler}.
 
 websocket_handle({text, Msg}, Handler) ->
-    case Handler(Msg) of
+    case Handler({text, Msg}) of
         {reply, Value} -> {reply, {text, Value}, Handler};
         {ping, Value} -> {reply, {pong, Value}, Handler};
         {pong, Value} -> {reply, {ping, Value}, Handler};
+        nothing -> {ok, Handler};
         {close, Value} -> {reply, {close, Value}, Handler}
     end;
-%Ignore
-websocket_handle(_Other, State) ->
-    {ok, State}.
 
-websocket_info({text, Text}, State) ->
-    {reply, {text, Text}, State};
-websocket_info(_Other, State) ->
-    {ok, State}.
+%Ignore
+websocket_handle(_Other, Handler) ->
+    {ok, Handler}.
+
+websocket_info({text, Text}, Handler) ->
+    {reply, {text, Text}, Handler};
+
+websocket_info(_Other, Handler) ->
+    {ok, Handler}.
